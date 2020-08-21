@@ -1,0 +1,51 @@
+
+
+
+/*********************************************************************************/
+/* Header                                                                        */
+/*********************************************************************************/
+
+	#header
+	{
+		padding: 5em 0em;
+	}
+	
+		.homepage #header
+		{
+			padding: 10em 0em;
+		}
+
+/*********************************************************************************/
+/* Logo                                                                          */
+/*********************************************************************************/
+
+	#logo
+	{
+		margin-bottom: 3em;
+		padding-top: 100px;
+	}
+	
+		#logo h1
+		{
+			color: #FFF;
+		}
+	
+		#logo h1 a
+		{
+			display: flex;
+			letter-spacing: 1px;
+			text-decoration: none;
+			text-transform: uppercase;
+			font-size: 2.5em;
+			font-weight: 700;
+			color: #FFF;
+			align-items: center;
+		}
+		@media screen and (max-width: 50em){
+			#logo h1 a
+			{
+				font-size: 1.5em;
+			}
+		  
+		}
+

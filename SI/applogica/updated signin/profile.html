@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+	<link rel="stylesheet" type="text/css" href="style.css">
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--Cognito JavaScript-->
+	<script src="js/amazon-cognito-identity.min.js"></script>  
+	<script src="js/config.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+</head>
+
+<body>
+	<div>
+		<h2>User Profile</h2>
+		<button type="button" onclick="signOut()">Sign out</button>
+	</div>
+
+	<div class="container">
+
+		<h4>Personal Information</h4>
+
+		<br>
+		<div>
+			<label>Email </label>
+		</div>
+		<div>
+			<label id="email_value"></label>
+		</div>
+
+		<br>
+		<div>
+			<label>Phone </label>
+		</div>
+		<div>
+			<label id="phone_value"></label>
+		</div>
+
+		<div>
+			<label>API Response </label>
+		</div>
+		<div>
+			<label id="demo"></label>
+		</div>
+
+		<div class="tab">
+			<button class="tablinks" onclick="openBlock(event, 'rule-definition')" id="defaultOpen">Rule Definition</button>
+			<button class="tablinks" onclick="openBlock(event, 'launch-infra')">Launch Infra</button>
+			<button class="tablinks" onclick="openBlock(event, 'processing')">Processing</button>
+		</div>
+
+		<form id="form_data" onsubmit="return false;">
+			<div id="rule-definition" class="tabcontent">
+				<br>
+				<label for="Username"><b>Enter S3 Bucket:</b></label>
+				<input id="username_register" type="text" placeholder="S3://mubucketname/config" name="s3Bucket" required>
+
+				<br><br>
+
+				<label for="file-format">Choose a File Format:</label>
+				<select id="file-format" name="file-format">
+					<option value="csv">CSV</option>
+					<option value="tsv">TSV</option>
+					<option value="parquet">Parquet</option>
+				</select>
+
+				<br><br>
+
+				<label for="data-sensitive">Data Sensitive:</label>
+				<select id="data-sensitive" name="data-sensitive" class="form-control item_unit">
+					<option value="private">Private</option>
+					<option value="public">Public</option>
+				</select>
+			</div>
+
+			<div id="launch-infra" class="tabcontent">
+				<br>
+				<label for="infrastructure">Choose Infrastructure:</label>
+				<select id="infrastructure" name="infrastructure">
+					<option value="s3">S3</option>
+					<option value="dynamo">Dynamo</option>
+				</select>
+			</div>
+
+			<div id="processing" class="tabcontent"><br>
+				<label for="programming-language">Choose a Language:</label> <br> <br>
+
+				<table class="table table-bordered" id="dynamic_field">  
+					<tr>
+						<td>
+							<select id="file-format" name="name[]">
+								<option value="python">Python</option>
+								<option value="node">Node.js</option>
+							</select>
+						</td>  
+						<td><button type="button" name="add" id="add" class="btn btn-success">Add More</button></td>
+					</tr>  
+				</table>
+			</div>
+
+			<div>
+				<button id="submit" type="submit" style="width:20%;" align="center">Sumbit</button>
+			</div>
+		</form>
+	</div>
+	<script>
+		var data = { 
+			UserPoolId : _config.cognito.userPoolId,
+			ClientId : _config.cognito.clientId
+		};
+		var userPool = new AmazonCognitoIdentity.CognitoUserPool(data);
+		var cognitoUser = userPool.getCurrentUser();
+
+		window.onload = function(){
+			if (cognitoUser != null) {
+				cognitoUser.getSession(function(err, session) {
+					if (err) {
+						alert(err);
+						return;
+					}
+					console.log('session validity: ' + session.isValid());
+				//Set the profile info
+				cognitoUser.getUserAttributes(function(err, result) {
+					if (err) {
+						console.log(err);
+						return;
+					}
+					console.log(result);
+					document.getElementById("email_value").innerHTML = result[4].getValue();
+					document.getElementById("phone_value").innerHTML = result[3].getValue();	
+				});			
+				
+			});
+			}
+		}
+		function signOut(){
+			if (cognitoUser != null) {
+				cognitoUser.signOut();
+				document.location.href = "/sign_out.html";	  
+			}
+		}
+
+		$(document).ready(function(){  
+			var i=1;
+			var count = 1; 
+			$('#add').click(function(){  
+				if(count>2){
+					console.log("field limit");
+					return;
+				}
+				i++;
+				count++;
+				$('#dynamic_field').append('<tr id="row'+i+'"><td><select id="file-format" name="name[]"><option value="python">Python</option><option value="node">Node.js</option></select></td><td><button name="remove" id="'+i+'" class="btn_remove">X</button></td></tr>');  
+			});  
+			$(document).on('click', '.btn_remove', function(){  
+				var button_id = $(this).attr("id");   
+				$('#row'+button_id+'').remove();
+				count--;
+			});
+
+			$('#submit').click(function(){
+				var form_data = $('#form_data').serialize();
+				console.log(form_data);
+
+				if (cognitoUser != null) {
+					cognitoUser.getSession(function(err, session) {
+						if (err) {
+							alert(err);
+							return;
+						}
+						console.log('session validity: ' + session.isValid());
+
+						if(session.isValid()){
+							loadDoc(form_data);
+						}
+						else{
+							console.log("session has expired");
+						}
+
+					});
+				}
+
+			});
+		});  
+	</script>
+
+	<script>
+		function openBlock(evt, blockName) {
+			var i, tabcontent, tablinks;
+			tabcontent = document.getElementsByClassName("tabcontent");
+			for (i = 0; i < tabcontent.length; i++) {
+				tabcontent[i].style.display = "none";
+			}
+			tablinks = document.getElementsByClassName("tablinks");
+			for (i = 0; i < tablinks.length; i++) {
+				tablinks[i].className = tablinks[i].className.replace(" active", "");
+			}
+			document.getElementById(blockName).style.display = "block";
+			evt.currentTarget.className += " active";
+		}
+
+		// Get the element with id="defaultOpen" and click on it
+		document.getElementById("defaultOpen").click();
+	</script>
+
+	<script>
+		function loadDoc(form_data) {
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					document.getElementById("demo").innerHTML = this.responseText;
+				}
+			};
+			xhttp.open("POST", "https://17gzrpiz9a.execute-api.us-east-1.amazonaws.com/dev/user", false);
+			xhttp.send(form_data);
+		}
+	</script>
+</body>
+</html>

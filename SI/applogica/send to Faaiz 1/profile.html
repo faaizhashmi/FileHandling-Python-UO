@@ -1,0 +1,270 @@
+<!DOCTYPE HTML>
+​
+<html>
+<head>
+	<title>Applogika Web Panel</title>
+​
+	<!-- ======================================= -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+​
+	<link rel="stylesheet" type="text/css" href="css/old.css">
+​
+	<!-- ======================================= -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<script src="js/skel.min.js"></script>
+	<script src="js/init.js"></script>
+	
+	<!-- ======================================= -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<!-- ======================================= -->
+​
+	<!--Cognito JavaScript-->
+	<script src="js/amazon-cognito-identity.min.js"></script>  
+	<script src="js/config.js"></script>
+	<!-- <script src="js/profile_functions.js"></script> -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<!-- ======================================= -->	
+	<noscript>
+		<link rel="stylesheet" href="css/style.css" />
+	</noscript>
+​	 <script></script>
+​
+	<script>
+		var data = { 
+			UserPoolId : _config.cognito.userPoolId,
+			ClientId : _config.cognito.clientId
+		};
+		var userPool = new AmazonCognitoIdentity.CognitoUserPool(data);
+		var cognitoUser = userPool.getCurrentUser();
+​
+		window.onload = function(){
+			if (cognitoUser != null) {
+				cognitoUser.getSession(function(err, session) {
+					if (err) {
+						alert(err);
+						return;
+					}
+					console.log('session validity: ' + session.isValid());
+					if(!session.isValid){
+						document.location.href = "/error.html";
+						return;
+					}
+				//Set the profile info
+				cognitoUser.getUserAttributes(function(err, result) {
+					if (err) {
+						console.log(err);
+						return;
+					}
+					console.log(result);	
+				});			
+				
+			});
+				loadBuckets();
+			}
+			else
+			{
+				document.location.href = "/error.html";
+			}
+		}
+	</script>
+</head>
+​
+<body>
+​
+	<div id="wrapper ">
+		<div id="header">
+​
+			<!-- Header -->
+			<div id="navbar" style=" height: 4em; z-index: 8;">
+				<ul>
+					<li style="float:right; padding: 1em 1em; font-size: 1.2em;"><a id="signout" type="submit" onclick="signOut()"><span style="font-size: 0.9em;" class="glyphicon glyphicon-log-out"></span>  Sign Out</a></li>
+				</ul>
+			</div>
+			<div class="container"> 
+				<!-- Logo -->
+				<div id="logo">
+					<h1><a id="page_title" href="#">Applogika</a></h1>
+				</div>
+​
+			</div>
+		</div>
+		<!-- /Header -->
+​
+		<div id="page">
+			<div class="container" >
+				<div class="row">
+					<div class="3u ">
+						<section id="sidebar1">
+​
+							<ul class="style3">
+								<button  class="btn btn-primary btn-block tablinks" onclick="openBlock(event, 'configuration')" id="defaultOpen">Configuration</button>
+								<br><br><br>
+								<button  class="btn btn-primary btn-block tablinks" onclick="openBlock(event, 'rule-defination')">Rule Defination</button>
+​
+								<div id="div1">
+									<a id="submit" type="submit" href="#" class="btn btn-primary btn-lg" >Submit</a>
+								</div>
+							</ul>
+						</section>
+					</div>
+					<div class="6u skel-cell-important">
+						<section id="content" >
+							<form id="form_data" autocomplete="off" onsubmit="return false;">
+								<div id="configuration" class="tabcontent overflow-auto">
+									<label for="Username"><b>Enter S3 Bucket:</b></label>
+									<br>
+									<div class="autocomplete" style="width:100%;">
+										<input id="s3Bucket" type="text" class="form-control" placeholder="S3://mubucketname/config" name="s3Bucket" required>
+										<br>
+									</div>
+​
+									<div class="form-group">
+										<label for="file-format">Data Base:</label>
+										<input id="data-base" type="text" class="form-control" placeholder="Enter a Data Base name" name="data-base" required>
+									</div>
+​
+									<div class="form-group">
+										<label for="file-format">Table:</label>
+										<input id="table" type="text" class="form-control" placeholder="Enter a Table name" name="table" required>
+									</div>
+​
+									<div class="form-group">
+										<label for="file-format">File Name:</label>
+										<input id="file-name" type="text" class="form-control" placeholder="Enter a File name" name="file-name" required>
+									</div>
+​
+									<div class="form-group">
+										<label for="data-format">Data Format:</label>
+										<input id="data-format" type="text" class="form-control" placeholder="Enter a Data Format" name="data-format" required>
+									</div>
+​
+									<label for="ignore-header">Ignore Header:</label>
+									<select id="ignore-header" name="ignore-header" class="form-control item_unit">
+										<option value="private">Yes</option>
+										<option value="public">No</option>
+									</select >
+									<br><br>
+								</div>
+​
+								<div id="rule-defination" class="tabcontent">
+									<label for="infrastructure">Choose Infrastructure:</label>
+									<button type="button" name="add" id="add" class="btn btn-success" style="float: right; margin-right: 1.5em; margin-bottom: 1.1em;">Add More</button>
+									<table class="table" id="dynamic_field">  
+										<tr>
+											<td style="">
+												<label for="infrastructure">Column:</label>
+											</td>
+											<td style="">
+												<label for="infrastructure">Data Type:</label>
+											</td>
+											<td style="">
+												<label for="infrastructure">Sensitivity:</label>
+											</td> 
+										</tr>
+​
+										<tr>
+											<td style="">
+												<input id="data-format" type="text" class="form-control" placeholder="Enter a Data Format" name="data-format" required>
+											</td>
+											<td style="">
+												<input id="data-format" type="text" class="form-control" placeholder="Enter a Data Format" name="data-format" required>
+											</td>
+											<td style="">
+												<select id ="sensitivity" class="form-control" id="dynamic_field" name="name[]">
+													<option value="public">Public</option>
+													<option value="sensitive">Sensitive</option>
+												</select>
+											</td>
+										</tr>
+									</table>
+								</div>
+							</form>
+						</section>
+					</div>	
+				</div>	
+			</div>
+		</div>
+		<!-- Copyright -->
+		<div id="copyright">
+			<div class="container">
+				<!-- Design: <a href="http://templated.co">TEMPLATED</a> Images: <a href="http://unsplash.com">Unsplash</a> (<a href="http://unsplash.com/cc0">CC0</a>) -->
+				Copyrights © 2020 All Rights Reserved by <a href="#">APPLOGIKA</a>.
+			</div>
+		</div>
+		
+	</div>
+​
+	<script>
+		$(document).ready(function(){  
+			var i=1;
+			var count = 1; 
+			$('#add').click(function(){  
+				if(count>20){
+					console.log("field limit");
+					return;
+				}
+				i++;
+				count++;
+				$('#dynamic_field').append('<tr id="row'+i+'"><td style=""><input id="data-format" type="text" class="form-control" placeholder="Enter a Data Format" name="data-format" required></td><td style=""><input id="data-format" type="text" class="form-control" placeholder="Enter a Data Format" name="data-format" required></td><td style=""><select id ="file-format" class="form-control" id="dynamic_field" name="name[]"><option value="public">Public</option><option value="sensitive">Sensitive</option></select></td><td><button type="button" name="remove" id="'+i+'" class="btn_remove btn btn-danger">X</button></td></tr>');
+			});  
+			$(document).on('click', '.btn_remove', function(){  
+				var button_id = $(this).attr("id");   
+				$('#row'+button_id+'').remove();
+				count--;
+			});
+​
+			$('#submit').click(function(){
+				var form_data = $('#form_data').serialize();
+				console.log(form_data);
+​
+				if (cognitoUser != null) {
+					cognitoUser.getSession(function(err, session) {
+						if (err) {
+							alert(err);
+							return;
+						}
+						console.log('session validity: ' + session.isValid());
+​
+						if(session.isValid()){
+							loadDoc(form_data);
+						}
+						else{
+							console.log("session has expired");
+						}
+​
+					});
+				}
+​
+			});
+		});  
+	</script>
+	<script>
+		window.onscroll = function() {myFunction()};
+​
+				// Get the navbar
+				var navbar = document.getElementById("navbar");
+				
+				// Get the offset position of the navbar
+				var sticky = navbar.offsetTop;
+				
+				// Add the sticky class to the navbar when you reach its scroll position. Remove "sticky" when you leave the scroll position
+				function myFunction() {
+					if (window.pageYOffset >= sticky) {
+						navbar.classList.add("sticky")
+					} else {
+						navbar.classList.remove("sticky");
+					}
+				}
+			</script>
+			<script>
+		// Get the element with id="defaultOpen" and click on it
+		document.getElementById("defaultOpen").click();
+	</script>
+</body>
+</html>
+Collapse
+
+
+
