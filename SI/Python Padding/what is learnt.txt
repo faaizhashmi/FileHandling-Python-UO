@@ -1,0 +1,10 @@
+Add padding to pdf file using pypdf
+[]-Read pdf file using
+[]-check structure of file and check it in python code
+[]know how to get content of a pdf page
+[]know how to make a blank page
+[]know how to set scale black page
+[]know how to copy contents on the blank page
+[]know instance of page
+[]know how to apply functions on page mergin scaling blanking etc
+[]learnt padding
