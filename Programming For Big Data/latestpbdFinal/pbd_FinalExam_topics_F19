@@ -1,0 +1,19 @@
+Python
+--Numpy
+--Pandas
+Datascience
+--Data wrangling
+--Exploratory data analysis
+--Model development
+----Linear regression
+BigData
+--Distributed Computing
+--Data Warehousing
+--Hadoop
+----MapReduce
+----hdfs
+----Other basics(including every dscussion in class)
+--Spark
+----RDD
+----Other basics(including every dscussion in class)
+
